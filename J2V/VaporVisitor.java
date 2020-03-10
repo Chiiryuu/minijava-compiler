@@ -57,7 +57,13 @@ import visitor.GJVisitor;
 public class VaporVisitor implements GJVisitor<String,SymbolTable> {
 
    private int tempCount = 0;
+   private int ifCount = 1;
    public boolean debug = false;
+
+   private String getNewIfLabel() {
+      return "if" + ifCount++;
+   }
+
 
    private String getNewTempName() {
       return "t." + tempCount++;
@@ -286,7 +292,7 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String statements = n.f15.accept(this, argu);
       n.f16.accept(this, argu);
       n.f17.accept(this, argu);
-      statements+="ret";
+      argu.addStatement(statements);
 
       String result = getIndentedStatementList(vars, statements);
 
@@ -517,14 +523,23 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       print(expr);
 
       if (!expr.contains("|")) {
-         argu.addStatement(id + " = " + expr);
+         String[] expressionList = expr.split("\n");
+         if (expressionList.length == 1)
+            return id + " = " + expr;
+         else {
+            _ret = "";
+            for (int i=0;i<expressionList.length-1;i++) {
+               _ret += expressionList[i]+'\n';
+            }
+            _ret += id + " = " + expressionList[expressionList.length-1];
+            return _ret;
+         }
       }
       else {
          String[] complexAssignment = expr.split("\\|");
          if (complexAssignment[0].equals("Array")) {
             int i = Integer.parseInt(complexAssignment[1]);
-            argu.addStatement(id + " = " + complexAssignment[2]);
-            argu.addStatement("[" + id + "] = "+i);
+            return id + " = " + complexAssignment[2] + '\n' + "[" + id + "] = "+i;
          }
          else {
             System.out.println("ERROR: class assignment not yet done!");
@@ -557,9 +572,8 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       int i = Integer.parseInt(index) * 4 + 4;
 
       String newExpr = "["+id+"+"+i+"] = "+newVal;
-      argu.addStatement(newExpr);
-
-      return "";
+      return newExpr;
+      //return "";
    }
 
    /**
@@ -575,12 +589,51 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String _ret=null;
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      String condition = n.f2.accept(this, argu);
+      String expressionVar = argu.lastTemp;
+
+      argu.lastTemp="";
+
       n.f3.accept(this, argu);
-      n.f4.accept(this, argu);
+      String trueDo = n.f4.accept(this, argu);
+
       n.f5.accept(this, argu);
-      n.f6.accept(this, argu);
-      return _ret;
+      String elseDo = n.f6.accept(this, argu);
+
+      String ifLabel = getNewIfLabel();
+
+      String result;
+
+      if (expressionVar.length()==0) {
+         result = "if0 "+condition+" goto :"+ifLabel+"_else";
+      }
+      else {
+         result = condition+'\n'+"if0 "+expressionVar+" goto :"+ifLabel+"_else";
+      }
+
+      String[] trueCommands = trueDo.split("\n");
+      trueDo = "";
+      for (String command : trueCommands) {
+         trueDo += "  "+command+"\n";
+      }
+
+      result +="\n"+trueDo+"goto :"+ifLabel+"_end";
+      result += '\n'+ifLabel+"_else:";
+
+      String[] elseCommands = elseDo.split("\n");
+      elseDo = "";
+      for (String command : elseCommands) {
+         elseDo += "  "+command+"\n";
+      }
+
+
+      result+='\n'+elseDo;
+      result+=ifLabel+"_end:";
+
+
+
+      return result;
    }
 
    /**
@@ -594,10 +647,36 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String _ret=null;
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+      String condition = n.f2.accept(this, argu);
+      String expressionVar = argu.lastTemp;
+
+      argu.lastTemp="";
+
       n.f3.accept(this, argu);
-      n.f4.accept(this, argu);
-      return _ret;
+      String trueDo = n.f4.accept(this, argu);
+
+      String ifLabel = getNewIfLabel();
+
+      String result = ifLabel+"_start:";
+
+      if (expressionVar.length()==0) {
+         result += "\nif0 "+condition+" goto :"+ifLabel+"_end";
+      }
+      else {
+         result += "\n"+condition+'\n'+"if0 "+expressionVar+" goto :"+ifLabel+"_end";
+      }
+      print("whiletrue: "+trueDo);
+      String[] trueCommands = trueDo.split("\n");
+      trueDo = "";
+      for (String command : trueCommands) {
+         trueDo += "  "+command+"\n";
+      }
+
+      result +="\n"+trueDo+"  goto :"+ifLabel+"_start";
+
+      result+="\n"+ifLabel+"_end:";
+
+      return result;
    }
 
    /**
@@ -614,9 +693,31 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String expr = n.f2.accept(this, argu);
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
-      print("Print: "+expr);
-      argu.addStatement("PrintIntS("+expr+")");
-      return "";
+
+      print("Print lasttemp:"+argu.lastTemp);
+      if (argu.lastTemp.length() == 0) {
+         String[] expressionList = expr.split("\n");
+         if (expressionList.length == 1)
+            _ret = "PrintIntS("+expr+")";
+         else {
+            _ret = "";
+            for (int i=0;i<expressionList.length-1;i++) {
+               _ret += expressionList[i]+'\n';
+            }
+            String newVar = getNewTempName();
+            _ret += newVar+" = "+expressionList[expressionList.length-1];
+            _ret += "\nPrintIntS(" + newVar+")";
+            return _ret;
+         }
+         return _ret;
+      }
+
+      else {
+         _ret = expr+"\n"+"PrintIntS("+argu.lastTemp+")";
+      }
+      print("Print: "+_ret);
+      //argu.addStatement("PrintIntS("+expr+")");
+      return _ret;
    }
 
    /**
@@ -634,14 +735,18 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String _ret=null;
       String expr = n.f0.accept(this, argu);
 
+
+      /*
       String[] exprList = stripReturnedExpression(expr);
       if (exprList.length == 1) {
          _ret = expr;
+         argu.lastTemp="";
       }
       else {
-         _ret = exprList[0];
-         argu.addStatement(exprList[1]);
-      }
+         argu.lastTemp = exprList[0];
+         _ret = exprList[1];
+      }*/
+      _ret = expr;
 
 
       return _ret;
@@ -666,10 +771,16 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
     * f2 -> PrimaryExpression()
     */
    public String visit(CompareExpression n, SymbolTable argu) {
-      String _ret=null;
-      n.f0.accept(this, argu);
+      String lhs = n.f0.accept(this, argu);
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+      String rhs = n.f2.accept(this, argu);
+
+      String var = getNewTempName();
+
+      argu.lastTemp = var;
+
+      String _ret =var+" = LtS("+lhs+" "+rhs+")";
+
       return _ret;
    }
 
@@ -749,9 +860,10 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       int i = Integer.parseInt(index) * 4 + 4;
 
       String var = getNewTempName();
-      argu.addStatement(var+" = ["+id+"+"+i+"]");
+      argu.lastTemp = var;
+      _ret = var+" = ["+id+"+"+i+"]";
 
-      return var;
+      return _ret;
    }
 
    /**
@@ -765,8 +877,9 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       n.f1.accept(this, argu);
       n.f2.accept(this, argu);
       String var = getNewTempName();
-      argu.addStatement(var+" = ["+id+"]");
-      return var;
+      _ret = var+" = ["+id+"]";
+      argu.lastTemp = var;
+      return _ret;
    }
 
    /**
@@ -910,7 +1023,21 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
    public String visit(NotExpression n, SymbolTable argu) {
       String _ret=null;
       n.f0.accept(this, argu);
-      String org = n.f1.accept(this, argu);
+      String expr = n.f1.accept(this, argu);
+
+      String var = getNewTempName();
+
+      if (argu.lastTemp.length() == 0) {
+         _ret = var + " = Sub(1 " + expr + ")";
+         argu.lastTemp=var;
+      }
+      else {
+         String tempVar = argu.lastTemp;
+         argu.lastTemp="";
+         _ret = expr +'\n' + var + " = Sub(1 " + tempVar + ")";
+         argu.lastTemp=var;
+      }
+
       return _ret;
    }
 

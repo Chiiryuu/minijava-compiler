@@ -6,6 +6,7 @@ public class ClassObject {
   public String parentClass;
   public ArrayList<String> classVariables;
   public ArrayList<String> classMethods;
+  public int classSize = 0;
 
 
   public ClassObject(String className) {

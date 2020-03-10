@@ -38,6 +38,8 @@ public class J2V {
 
     tableBuilder.visit(root, symbolTable);
 
+    symbolTable.calculateClassSizes();
+
     //System.out.println(symbolTable);
 
     VaporVisitor vapor = new VaporVisitor();

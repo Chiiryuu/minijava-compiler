@@ -9,6 +9,8 @@ public class SymbolTable {
   public HashMap<String, MethodBlock> blocks;
   public String currentClass = "";
   public String currentBlock = "";
+  public String blockIndentationLevel = "";
+  public String lastTemp = "";
 
   public String getLastExpression() {
     return blocks.get(currentBlock).getLastStatement();
@@ -16,8 +18,14 @@ public class SymbolTable {
 
   public void addStatement(String miniBlock) {
     for (String line: miniBlock.split("\n")) {
-      blocks.get(currentBlock).addStatement(line);
+      blocks.get(currentBlock).addStatement(blockIndentationLevel+line);
     }
+  }
+
+  public String popLastStatement() {
+    String result = blocks.get(currentBlock).getLastStatement();
+    blocks.get(currentBlock).statements.remove(result);
+    return result;
   }
 
   public void setCurrentClass(String className) {
@@ -60,6 +68,12 @@ public class SymbolTable {
     ClassObject object = table.get(currentClass);
     object.addMethod(sig);
     blocks.put(sig,new MethodBlock(sig));
+  }
+
+  public void calculateClassSizes() {
+    for (ClassObject object : table.values()) {
+      object.classSize = object.classVariables.size() + object.classMethods.size();
+    }
   }
 
   public SymbolTable() {
