@@ -4,7 +4,20 @@ import java.util.TreeMap;
 
 public class SymbolTable {
   public String scope;
+  private String mainClass=null;
   public HashMap<String, TokenEntry> table;
+
+  public String getMainClass() {
+    return mainClass;
+  }
+
+  public void setMainClass(String classIn) {
+    this.mainClass = classIn;
+  }
+
+  public boolean classIsMain(String classIn) {
+    return classIn.equals(mainClass);
+  }
 
   public SymbolTable() {
     this.scope ="";
@@ -146,6 +159,9 @@ public class SymbolTable {
       while (classToken.inherit != null) {
         exploredClasses.add(classToken.symbol);
         String parentClass = classToken.inherit;
+        //System.out.println(parentClass+" ==? "+mainClass);
+        if (classIsMain(parentClass))
+          return false;
         //System.out.println(exploredClasses);
         //System.out.println(parentClass);
         if (!table.containsKey(parentClass))

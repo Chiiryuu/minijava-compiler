@@ -533,7 +533,7 @@ public class TypeVisitor<R, A> implements GJVisitor<R, A> {
       n.f3.accept(this, argu);
 
       if (!type1.equals(type2)) {
-         if (!classExtends(argu, type1, type2)) {
+         if (!classExtends(argu, type2, type1)) {
             throwTypeError("Failed Assignment");
          }
       }
@@ -905,7 +905,9 @@ public class TypeVisitor<R, A> implements GJVisitor<R, A> {
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
       n.f2.accept(this, argu);
-      n.f3.accept(this, argu);
+      R type = n.f3.accept(this, argu);
+	    if (!typeEquals((R)"Int", type))
+         throwTypeError("Bad Array Length");
       n.f4.accept(this, argu);
       return _ret;
    }

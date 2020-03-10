@@ -12,7 +12,7 @@ public class Typecheck {
   }
 
   public static void typeCheck(MiniJavaParser parser) throws ParseException {
-    Goal root = parser.Goal();
+    Goal root = MiniJavaParser.Goal();
 
 
     //runPrettyPrinter(root);
