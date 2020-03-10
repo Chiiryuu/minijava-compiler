@@ -81,6 +81,8 @@ public class TableBuilder<R, A> implements GJVisitor<R, A> {
       if (argu instanceof SymbolTable) {
          SymbolTable table = ((SymbolTable)(argu));
          String symbolTitle = table.scope;
+         if (table.getMainClass() == null)
+            table.setMainClass(newEntry);
          if (symbolTitle.length()>0)
             symbolTitle +="::";
          symbolTitle+=newEntry;
