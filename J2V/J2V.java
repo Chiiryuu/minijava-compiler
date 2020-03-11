@@ -40,13 +40,20 @@ public class J2V {
 
     symbolTable.calculateClassSizes();
 
+    symbolTable.makeClassConsts();
+
     //System.out.println(symbolTable);
 
     VaporVisitor vapor = new VaporVisitor();
     vapor.debug = true;
-    String program = vapor.visit(root, symbolTable);
+    String output = vapor.visit(root, symbolTable);
     //System.out.println(program);
-    System.out.println(symbolTable.blocks.get("Main"));
+    String program = symbolTable.classConsts+'\n';
+    for (MethodBlock block : symbolTable.blocks.values()) {
+      program += block.toString() + "\n\n";
+    }
+    System.out.println(program);
+    //System.out.println(symbolTable.blocks.get("Main"));
   }
 
   public static void main(String[] args) throws ParseException {

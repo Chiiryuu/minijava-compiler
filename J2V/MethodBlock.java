@@ -2,10 +2,17 @@ import java.util.ArrayList;
 
 public class MethodBlock {
   public String name;
+  public String args="";
   public ArrayList<String> statements;
 
   public MethodBlock(String name) {
     this.name = name;
+    this.statements = new ArrayList<>();
+  }
+
+  public MethodBlock(String name, String args) {
+    this.name = name;
+    this.args = args;
     this.statements = new ArrayList<>();
   }
 
@@ -21,7 +28,7 @@ public class MethodBlock {
 
   @Override
   public String toString() {
-    String result="func "+name+"()\n";
+    String result="func "+name+"("+args+")\n";
     for (int i=0; i<statements.size();i++) {
       if (i+1 == statements.size()) {
         String last = "  "+statements.get(i);
