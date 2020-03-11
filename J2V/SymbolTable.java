@@ -24,10 +24,10 @@ public class SymbolTable {
   }
 
   public int getMethodOffset(String className, String method) {
-    String sig = className+"."+method;
     ClassObject object = classes.get(className);
     for (int i=0; i<object.classMethods.size();i++) {
-      if (sig.equals(object.classMethods.get(i))) {
+      String methodName = object.classMethods.get(i).split("\\.")[1];
+      if (method.equals(methodName)) {
         return 4*i;
       }
     }
@@ -101,6 +101,25 @@ public class SymbolTable {
     ClassObject object = classes.get(currentClass);
     object.addMethod(sig);
     blocks.put(sig,new MethodBlock(sig));
+  }
+
+  public void setClassInheritance() {
+    for (ClassObject object : classes.values()) {
+      ClassObject parentObject = object;
+      String parent = object.parentClass;
+      while (parent != null) {
+        parentObject = classes.get(parent);
+        parent = parentObject.parentClass;
+
+        for (String var:parentObject.classVariables) {
+          object.addVariable(var);
+        }
+        for (String method:parentObject.classMethods) {
+          object.addMethod(method);
+        }
+
+      }
+    }
   }
 
   public void calculateClassSizes() {

@@ -137,7 +137,13 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       }
 
       else {
+         if (statement.contains(" ")) {
+            String var = getNewTempName();
+            result = new String[]{var, var + " = " + statement};
+            return result;
+         }
 
+         /*
          for (String op : ops) {
             if (statement.contains(op + '(')) {
                String var = getNewTempName();
@@ -146,6 +152,8 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
                return result;
             }
          }
+
+          */
       }
       return new String[] {statement};
    }
@@ -388,7 +396,6 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
       String id = n.f2.accept(this, argu);
-      this.tempCount=0;
       argu.setCurrentBlock(argu.currentClass+'.'+id);
       print(argu.currentBlock);
       n.f3.accept(this, argu);
@@ -415,8 +422,10 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
 
       n.f9.accept(this, argu);
       String returnVal = n.f10.accept(this, argu);
+      print("Returning: "+returnVal);
       if (returnVal != null && returnVal.length()> 0) {
          String returnVar = argu.lastTemp;
+         argu.lastTemp = "";
          if (returnVar.length()==0) {
             argu.addStatement("ret "+returnVal);
          }
@@ -732,7 +741,7 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
 
-      print("Print lasttemp:"+argu.lastTemp);
+      print("Print: "+expr);
       String var = argu.lastTemp;
       argu.lastTemp = "";
       if (var.length() == 0) {
@@ -740,7 +749,7 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
          if (expressionList.length == 1) {
             String[] exprList = makeTempVarIfNeeded(expr);
             if (exprList.length > 1) {
-               _ret = exprList[1]+"\n"+exprList[0];
+               _ret = exprList[1]+"\nPrintIntS("+exprList[0]+")";
             }
             else {
                _ret = "PrintIntS(" + expr + ")";
@@ -805,11 +814,34 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
     * f2 -> PrimaryExpression()
     */
    public String visit(AndExpression n, SymbolTable argu) {
-      String _ret=null;
-      //TODO
-      n.f0.accept(this, argu);
+      String lhs = n.f0.accept(this, argu);
+      String leftVar = argu.lastTemp;
+      argu.lastTemp = "";
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+
+      String rhs = n.f2.accept(this, argu);
+      String rightVar = argu.lastTemp;
+      argu.lastTemp = "";
+
+      String before = "";
+
+      if (leftVar.length() > 0) {
+         before+=lhs;
+         lhs = leftVar;
+      }
+      if (rightVar.length() > 0) {
+         before+="\n"+rhs;
+         rhs = rightVar;
+      }
+
+      String var = getNewTempName();
+
+      argu.lastTemp = var;
+
+      String _ret =before+"\n"+var+" = Add("+lhs+" "+rhs+")\n"+var+" = LtS(1 "+var+")";
+
       return _ret;
    }
 
@@ -820,60 +852,51 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
     */
    public String visit(CompareExpression n, SymbolTable argu) {
       String lhs = n.f0.accept(this, argu);
+      String leftVar = argu.lastTemp;
+      argu.lastTemp = "";
+
       n.f1.accept(this, argu);
+
+
       String rhs = n.f2.accept(this, argu);
+      String rightVar = argu.lastTemp;
+      argu.lastTemp = "";
+
+      String before = "";
+
+      if (leftVar.length() > 0) {
+         before+=lhs;
+         lhs = leftVar;
+      }
+      if (rightVar.length() > 0) {
+         before+="\n"+rhs;
+         rhs = rightVar;
+      }
 
       String var = getNewTempName();
 
       argu.lastTemp = var;
 
-      String _ret =var+" = LtS("+lhs+" "+rhs+")";
+      String _ret =before+"\n"+var+" = LtS("+lhs+" "+rhs+")";
 
       return _ret;
    }
 
-   public String doBinop(String expr1, String expr2, String op, String var1, String var2) {
+   public String doBinop(String lhs, String rhs, String op, String leftVar, String rightVar, String var) {
+
       String before = "";
 
+      if (leftVar.length() > 0) {
+         before+=lhs;
+         lhs = leftVar;
+      }
+      if (rightVar.length() > 0) {
+         before+="\n"+rhs;
+         rhs = rightVar;
+      }
+      String _ret =before+"\n"+var+" = "+op+"("+lhs+" "+rhs+")";
 
-      print("binop: ["+expr1+"], ["+expr2+']');
-      print("binVars: "+var1+", "+var2);
-
-      boolean alreadyTemp = false;
-
-      if (var1.length() > 0) {
-         before += expr1;
-         expr1 = var1;
-         alreadyTemp = true;
-      }
-      else {
-         String[] exprList1 = makeTempVarIfNeeded(expr1);
-         if (exprList1.length > 1) {
-            before += exprList1[1] + '\n';
-            expr1 = exprList1[0];
-         }
-      }
-
-      if (var2.length() > 0) {
-         before += expr2;
-         expr2 = var2;
-         alreadyTemp = true;
-      }
-      else {
-         String[] exprList2 = makeTempVarIfNeeded(expr2);
-         if (exprList2.length > 1) {
-            before += exprList2[1] + '\n';
-            expr2 = exprList2[0];
-         }
-      }
-      if (alreadyTemp) {
-         print(op + ": [" + before + "] -> [" + op + "(" + expr1 + " " + expr2 + ")]");
-         return before +"\n"+ op + "(" + expr1 + " " + expr2 + ")";
-      }
-      else {
-         print(op + ": [" + before + "] -> [" + op + "(" + expr1 + " " + expr2 + ")]");
-         return before + op + "(" + expr1 + " " + expr2 + ")";
-      }
+      return _ret;
    }
 
    /**
@@ -890,7 +913,9 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String expr2 = n.f2.accept(this, argu);
       String var2 = argu.lastTemp;
       argu.lastTemp="";
-      return doBinop(expr1,expr2,"Add", var1, var2);
+      String var = getNewTempName();
+      argu.lastTemp=var;
+      return doBinop(expr1,expr2,"Add", var1, var2, var);
    }
 
    /**
@@ -907,7 +932,9 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String expr2 = n.f2.accept(this, argu);
       String var2 = argu.lastTemp;
       argu.lastTemp="";
-      return doBinop(expr1,expr2,"Sub", var1, var2);
+      String var = getNewTempName();
+      argu.lastTemp=var;
+      return doBinop(expr1,expr2,"Sub", var1, var2, var);
    }
 
    /**
@@ -924,7 +951,9 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String expr2 = n.f2.accept(this, argu);
       String var2 = argu.lastTemp;
       argu.lastTemp="";
-      return doBinop(expr1,expr2,"MulS", var1, var2);
+      String var = getNewTempName();
+      argu.lastTemp=var;
+      return doBinop(expr1,expr2,"MulS", var1, var2, var);
    }
 
    /**
@@ -1030,8 +1059,16 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
             return result;
          }
          else {
-            print("ERROR: var of length 0 in MessageSend");
-            return "";
+            /*
+            t.0 = [other]
+            t.0 = [t.0+4]
+            aux01 = call t.0(other)
+             */
+            print("This Call:"+funcName+"; "+args);
+            //print("Call: "+var+", "+funcName+", ["+args+"]");
+            args = caller+" "+args;
+            String result = before+'\n'+callVar+" = ["+caller+"]"+"\n"+callVar+" = ["+callVar+"+"+offset+"]"+"\n"+newVar+" = call "+callVar+"("+args+")";
+            return result;
          }
       }
       else {

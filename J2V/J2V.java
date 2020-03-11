@@ -38,6 +38,8 @@ public class J2V {
 
     tableBuilder.visit(root, symbolTable);
 
+    symbolTable.setClassInheritance();
+
     symbolTable.calculateClassSizes();
 
     symbolTable.makeClassConsts();
