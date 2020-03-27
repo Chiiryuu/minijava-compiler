@@ -1,0 +1,464 @@
+const vmt_LL
+  :LL.Start
+
+const vmt_Element
+  :Element.Init
+  :Element.GetAge
+  :Element.GetSalary
+  :Element.GetMarried
+  :Element.Equal
+  :Element.Compare
+
+const vmt_List
+  :List.Init
+  :List.InitNew
+  :List.Insert
+  :List.SetNext
+  :List.Delete
+  :List.Search
+  :List.GetEnd
+  :List.GetElem
+  :List.GetNext
+  :List.Print
+
+
+func Element.GetAge(this  )
+  Element.GetAge.0 = [this+4]
+  ret Element.GetAge.0
+
+
+func List.SetNext(this v_next )
+  List.SetNext.0 = v_next
+  [this+8] = List.SetNext.0
+  ret 1
+
+
+func List.GetEnd(this  )
+  List.GetEnd.0 = [this+12]
+  ret List.GetEnd.0
+
+
+func List.GetNext(this  )
+  List.GetNext.0 = [this+8]
+  ret List.GetNext.0
+
+
+func List.Print(this  )
+  aux01 = this
+  List.Print.0 = [this+12]
+  var_end = List.Print.0
+  List.Print.1 = [this+4]
+  var_elem = List.Print.1
+  if16_start:
+  t.56 = Sub(1 var_end)
+  if0 t.56 goto :if16_end
+    t.57 = [var_elem]
+    t.57 = [t.57+4]
+    t.58 = call t.57(var_elem )
+    PrintIntS(t.58)
+    t.59 = [aux01]
+    t.59 = [t.59+32]
+    t.60 = call t.59(aux01 )
+    aux01 = t.60
+    t.61 = [aux01]
+    t.61 = [t.61+24]
+    t.62 = call t.61(aux01 )
+    var_end = t.62
+    t.63 = [aux01]
+    t.63 = [t.63+28]
+    t.64 = call t.63(aux01 )
+    var_elem = t.64
+    goto :if16_start
+  if16_end:
+  ret 1
+
+
+func List.GetElem(this  )
+  List.GetElem.0 = [this+4]
+  ret List.GetElem.0
+
+
+func LL.Start(this  )
+  t.65 = HeapAllocZ(16)
+  [t.65] = :vmt_List
+  if t.65 goto :null_if17
+    Error("null pointer")
+  null_if17:
+  last_elem = t.65
+  t.66 = [last_elem]
+  t.66 = [t.66+0]
+  t.67 = call t.66(last_elem )
+  aux01 = t.67
+  head = last_elem
+  t.68 = [head]
+  t.68 = [t.68+0]
+  t.69 = call t.68(head )
+  aux01 = t.69
+  t.70 = [head]
+  t.70 = [t.70+36]
+  t.71 = call t.70(head )
+  aux01 = t.71
+  t.72 = HeapAllocZ(16)
+  [t.72] = :vmt_Element
+  if t.72 goto :null_if18
+    Error("null pointer")
+  null_if18:
+  el01 = t.72
+  t.73 = [el01]
+  t.73 = [t.73+0]
+  t.74 = call t.73(el01 25 37000 0)
+  aux01 = t.74
+  t.75 = [head]
+  t.75 = [t.75+8]
+  t.76 = call t.75(head el01)
+  head = t.76
+  t.77 = [head]
+  t.77 = [t.77+36]
+  t.78 = call t.77(head )
+  aux01 = t.78
+  PrintIntS(10000000)
+  t.79 = HeapAllocZ(16)
+  [t.79] = :vmt_Element
+  if t.79 goto :null_if19
+    Error("null pointer")
+  null_if19:
+  el01 = t.79
+  t.80 = [el01]
+  t.80 = [t.80+0]
+  t.81 = call t.80(el01 39 42000 1)
+  aux01 = t.81
+  el02 = el01
+  t.82 = [head]
+  t.82 = [t.82+8]
+  t.83 = call t.82(head el01)
+  head = t.83
+  t.84 = [head]
+  t.84 = [t.84+36]
+  t.85 = call t.84(head )
+  aux01 = t.85
+  PrintIntS(10000000)
+  t.86 = HeapAllocZ(16)
+  [t.86] = :vmt_Element
+  if t.86 goto :null_if20
+    Error("null pointer")
+  null_if20:
+  el01 = t.86
+  t.87 = [el01]
+  t.87 = [t.87+0]
+  t.88 = call t.87(el01 22 34000 0)
+  aux01 = t.88
+  t.89 = [head]
+  t.89 = [t.89+8]
+  t.90 = call t.89(head el01)
+  head = t.90
+  t.91 = [head]
+  t.91 = [t.91+36]
+  t.92 = call t.91(head )
+  aux01 = t.92
+  t.93 = HeapAllocZ(16)
+  [t.93] = :vmt_Element
+  if t.93 goto :null_if21
+    Error("null pointer")
+  null_if21:
+  el03 = t.93
+  t.94 = [el03]
+  t.94 = [t.94+0]
+  t.95 = call t.94(el03 27 34000 0)
+  aux01 = t.95
+  t.96 = [head]
+  t.96 = [t.96+20]
+  t.97 = call t.96(head el02)
+  PrintIntS(t.97)
+  t.98 = [head]
+  t.98 = [t.98+20]
+  t.99 = call t.98(head el03)
+  PrintIntS(t.99)
+  PrintIntS(10000000)
+  t.100 = HeapAllocZ(16)
+  [t.100] = :vmt_Element
+  if t.100 goto :null_if22
+    Error("null pointer")
+  null_if22:
+  el01 = t.100
+  t.101 = [el01]
+  t.101 = [t.101+0]
+  t.102 = call t.101(el01 28 35000 0)
+  aux01 = t.102
+  t.103 = [head]
+  t.103 = [t.103+8]
+  t.104 = call t.103(head el01)
+  head = t.104
+  t.105 = [head]
+  t.105 = [t.105+36]
+  t.106 = call t.105(head )
+  aux01 = t.106
+  PrintIntS(2220000)
+  t.107 = [head]
+  t.107 = [t.107+16]
+  t.108 = call t.107(head el02)
+  head = t.108
+  t.109 = [head]
+  t.109 = [t.109+36]
+  t.110 = call t.109(head )
+  aux01 = t.110
+  PrintIntS(33300000)
+  t.111 = [head]
+  t.111 = [t.111+16]
+  t.112 = call t.111(head el01)
+  head = t.112
+  t.113 = [head]
+  t.113 = [t.113+36]
+  t.114 = call t.113(head )
+  aux01 = t.114
+  PrintIntS(44440000)
+  ret 0
+
+
+func List.Delete(this e )
+  my_head = this
+  ret_val = 0
+  t.25 = Sub(0 1)
+  aux04 = t.25
+  aux01 = this
+  prev = this
+  List.Delete.0 = [this+12]
+  var_end = List.Delete.0
+  List.Delete.1 = [this+4]
+  var_elem = List.Delete.1
+  if13_start:
+  t.26 = Sub(1 var_end)
+  t.27 = Sub(1 ret_val)
+  t.28 = Add(t.26 t.27)
+  t.28 = LtS(1 t.28)
+  if0 t.28 goto :if13_end
+    t.29 = [e]
+    t.29 = [t.29+0]
+    t.30 = call t.29(e var_elem)
+    if0 t.30 goto :if11_else
+      ret_val = 1
+      t.31 = LtS(aux04 0)
+      if0 t.31 goto :if10_else
+        t.32 = [aux01]
+        t.32 = [t.32+32]
+        t.33 = call t.32(aux01 )
+        my_head = t.33
+      goto :if10_end
+      if10_else:
+        t.34 = Sub(0 555)
+        PrintIntS(t.34)
+        t.35 = [aux01]
+        t.35 = [t.35+32]
+        t.36 = call t.35(aux01 )
+        t.37 = [prev]
+        t.37 = [t.37+12]
+        t.38 = call t.37(prev t.36)
+        aux05 = t.38
+        t.39 = Sub(0 555)
+        PrintIntS(t.39)
+      if10_end:
+    goto :if11_end
+    if11_else:
+      nt = 0
+    if11_end:
+    t.40 = Sub(1 ret_val)
+    if0 t.40 goto :if12_else
+      prev = aux01
+      t.41 = [aux01]
+      t.41 = [t.41+32]
+      t.42 = call t.41(aux01 )
+      aux01 = t.42
+      t.43 = [aux01]
+      t.43 = [t.43+24]
+      t.44 = call t.43(aux01 )
+      var_end = t.44
+      t.45 = [aux01]
+      t.45 = [t.45+28]
+      t.46 = call t.45(aux01 )
+      var_elem = t.46
+      aux04 = 1
+    goto :if12_end
+    if12_else:
+      nt = 0
+    if12_end:
+    goto :if13_start
+  if13_end:
+  ret my_head
+
+
+func List.Search(this e )
+  int_ret_val = 0
+  aux01 = this
+  List.Search.0 = [this+12]
+  var_end = List.Search.0
+  List.Search.1 = [this+4]
+  var_elem = List.Search.1
+  if15_start:
+  t.47 = Sub(1 var_end)
+  if0 t.47 goto :if15_end
+    t.48 = [e]
+    t.48 = [t.48+0]
+    t.49 = call t.48(e var_elem)
+    if0 t.49 goto :if14_else
+      int_ret_val = 1
+    goto :if14_end
+    if14_else:
+      nt = 0
+    if14_end:
+    t.50 = [aux01]
+    t.50 = [t.50+32]
+    t.51 = call t.50(aux01 )
+    aux01 = t.51
+    t.52 = [aux01]
+    t.52 = [t.52+24]
+    t.53 = call t.52(aux01 )
+    var_end = t.53
+    t.54 = [aux01]
+    t.54 = [t.54+28]
+    t.55 = call t.54(aux01 )
+    var_elem = t.55
+    goto :if15_start
+  if15_end:
+  ret int_ret_val
+
+
+func Element.GetMarried(this  )
+  Element.GetMarried.0 = [this+12]
+  ret Element.GetMarried.0
+
+
+func Element.GetSalary(this  )
+  Element.GetSalary.0 = [this+8]
+  ret Element.GetSalary.0
+
+
+func Element.Equal(this other )
+  ret_val = 1
+  t.3 = [other]
+  t.3 = [t.3+4]
+  t.4 = call t.3(other )
+  aux01 = t.4
+  t.5 = [this]
+  t.5 = [t.5+20]
+  t.6 = call t.5(this aux01 ClassVar)
+  t.7 = Sub(1 t.6)
+  if0 t.7 goto :if6_else
+    ret_val = 0
+  goto :if6_end
+  if6_else:
+    t.8 = [other]
+    t.8 = [t.8+8]
+    t.9 = call t.8(other )
+    aux02 = t.9
+    t.10 = [this]
+    t.10 = [t.10+20]
+    t.11 = call t.10(this aux02 ClassVar)
+    t.12 = Sub(1 t.11)
+    if0 t.12 goto :if5_else
+      ret_val = 0
+    goto :if5_end
+    if5_else:
+  Element.Equal.0 = [this+12]
+      if0 Element.Equal.0 goto :if4_else
+        t.13 = [other]
+        t.13 = [t.13+12]
+        t.14 = call t.13(other )
+        t.15 = Sub(1 t.14)
+        if0 t.15 goto :if2_else
+          ret_val = 0
+        goto :if2_end
+        if2_else:
+          nt = 0
+        if2_end:
+      goto :if4_end
+      if4_else:
+        t.16 = [other]
+        t.16 = [t.16+12]
+        t.17 = call t.16(other )
+        if0 t.17 goto :if3_else
+          ret_val = 0
+        goto :if3_end
+        if3_else:
+          nt = 0
+        if3_end:
+      if4_end:
+    if5_end:
+  if6_end:
+  ret ret_val
+
+
+func List.Init(this  )
+  List.Init.0 = 1
+  [this+12] = List.Init.0
+  ret 1
+
+
+func List.Insert(this new_elem )
+  aux03 = this
+  t.22 = HeapAllocZ(16)
+  [t.22] = :vmt_List
+  if t.22 goto :null_if9
+    Error("null pointer")
+  null_if9:
+  aux02 = t.22
+  t.23 = [aux02]
+  t.23 = [t.23+4]
+  t.24 = call t.23(aux02 new_elem aux03 0)
+  ret_val = t.24
+  ret aux02
+
+
+func Element.Init(this v_Age v_Salary v_Married )
+  Element.Init.0 = v_Age
+  [this+4] = Element.Init.0
+  Element.Init.1 = v_Salary
+  [this+8] = Element.Init.1
+  Element.Init.2 = v_Married
+  [this+12] = Element.Init.2
+  ret 1
+
+
+func Element.Compare(this num1 num2 )
+  retval = 0
+  t.18 = Add(num2 1)
+  aux02 = t.18
+  t.19 = LtS(num1 num2)
+  if0 t.19 goto :if8_else
+    retval = 0
+  goto :if8_end
+  if8_else:
+    t.20 = LtS(num1 aux02)
+    t.21 = Sub(1 t.20)
+    if0 t.21 goto :if7_else
+      retval = 0
+    goto :if7_end
+    if7_else:
+      retval = 1
+    if7_end:
+  if8_end:
+  ret retval
+
+
+func List.InitNew(this v_elem v_next v_end )
+  List.InitNew.0 = v_end
+  [this+12] = List.InitNew.0
+  List.InitNew.1 = v_elem
+  [this+4] = List.InitNew.1
+  List.InitNew.2 = v_next
+  [this+8] = List.InitNew.2
+  ret 1
+
+
+func Main()
+  t.0 = HeapAllocZ(4)
+  [t.0] = :vmt_LL
+  if t.0 goto :null_if1
+    Error("null pointer")
+  null_if1:
+  t.1 = [t.0]
+  t.1 = [t.1+0]
+  t.2 = call t.1(t.0 )
+  PrintIntS(t.2)
+  ret
+
+
+
