@@ -602,9 +602,13 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String id = n.f0.accept(this, argu);
       n.f1.accept(this, argu);
       String index = n.f2.accept(this, argu);
+      String indexVar = argu.lastTemp;
+      argu.lastTemp = "";
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
       String newVal = n.f5.accept(this, argu);
+      String exprVar = argu.lastTemp;
+      argu.lastTemp = "";
       n.f6.accept(this, argu);
 
 
@@ -613,13 +617,33 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       try {
          int i = Integer.parseInt(index) * 4 + 4;
          formalIndex = ""+i;
+         String newExpr = "["+id+"+"+formalIndex+"] = "+newVal;
+         return newExpr;
       }
       catch (Exception e) {
-         formalIndex = index;
+
+         //System.out.println("ArrAssignment Index: " + index);
+         //System.out.println("ArrAssignment Expr: " + newVal);
+
+         String before = "";
+         if (indexVar.length() > 0) {
+            before = index+"\n";
+            index = indexVar;
+         }
+
+         if (exprVar.length() > 0) {
+            before += newVal+"\n";
+            newVal= exprVar;
+         }
+
+            String var = getNewTempName();
+            String var2 = getNewTempName();
+            formalIndex = index;
+            return before+var2 + " = MulS(4 " + index + ")\n" + var2 + " = Add(4 " + var2 + ")\n" + var
+                + " = Add(" + id + " " + var2 + ")\n[" + var + "] = " + newVal;
       }
 
-      String newExpr = "["+id+"+"+formalIndex+"] = "+newVal;
-      return newExpr;
+
       //return "";
    }
 
@@ -974,22 +998,36 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       print("Lookup: "+id);
       print("index: "+index);
       String formalIndex = "";
-      try {
-         int i = Integer.parseInt(index) * 4 + 4;
-         formalIndex = ""+i;
-      }
-      catch (Exception e) {
-         formalIndex = index;
-      }
+
 
       String var = getNewTempName();
       argu.lastTemp = var;
 
-      if (id.length() == 0)
-         _ret = var+" = ["+expr+"+"+formalIndex+"]";
-      else {
-         _ret = expr+"\n"+var+" = ["+id+"+"+formalIndex+"]";
+      try {
+         int i = Integer.parseInt(index) * 4 + 4;
+         formalIndex = ""+i;
+         if (id.length() == 0)
+            _ret = var+" = ["+expr+"+"+formalIndex+"]";
+         else {
+            _ret = expr+"\n"+var+" = ["+id+"+"+formalIndex+"]";
+         }
       }
+      catch (Exception e) {
+        // System.out.println("ArrLookup Expr: "+expr);
+         //TODO: Same as above
+         String var2 = getNewTempName();
+         if (id.length() == 0)
+            _ret = var2+" = MulS(4 "+index+")\n"+var2+" = Add(4 "+var2+")\n"+var2+" = Add("+expr+" "+var2+")\n"+var+" = ["+var2+"]";
+         else {
+            _ret = expr+"\n"+var2+" = MulS(4 "+index+")\n"+var2+" = Add(4 "+var2+")\n"+var2+" = Add("+expr+" "+var2+")\n"+var+" = ["+var2+"]";
+         }
+      }
+
+
+
+
+
+
 
 
       return _ret;
@@ -1030,6 +1068,12 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String args = n.f4.accept(this, argu);
       n.f5.accept(this, argu);
 
+      if (funcName.equals("size")) {
+         String newVar = getNewTempName();
+         argu.lastTemp = newVar;
+         return newVar+" = ["+caller+"]";
+      }
+
       String before = "";
 
       print("RawArgs: "+args);
@@ -1047,13 +1091,19 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String callVar = getNewTempName();
       String newVar = getNewTempName();
       argu.lastTemp = newVar;
-      int offset = argu.getMethodOffset(argu.currentClass,funcName);
+      //Caller is className
+      print("Caller: "+caller);
+      int offset = 0;
+      if (!argu.classVars.containsKey(caller))
+         offset = argu.getMethodOffset(argu.currentClass,funcName);
+      else
+         offset = argu.getMethodOffset(argu.classVars.get(caller),funcName);
 
 
       if (var.length() == 0) {
          if (caller.equals("this")) {
             print("This Call:"+funcName+"; "+args);
-            //print("Call: "+var+", "+funcName+", ["+args+"]");
+            print("Call: "+callVar+" = ["+caller+"]"+"\n"+callVar+" = ["+callVar+"+"+offset+"]"+"\n"+newVar+" = call "+callVar+"("+args+")");
             args = "this "+args;
             String result = before+'\n'+callVar+" = ["+caller+"]"+"\n"+callVar+" = ["+callVar+"+"+offset+"]"+"\n"+newVar+" = call "+callVar+"("+args+")";
             return result;
@@ -1065,7 +1115,7 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
             aux01 = call t.0(other)
              */
             print("This Call:"+funcName+"; "+args);
-            //print("Call: "+var+", "+funcName+", ["+args+"]");
+            print("Call: "+callVar+" = ["+caller+"]"+"\n"+callVar+" = ["+callVar+"+"+offset+"]"+"\n"+newVar+" = call "+callVar+"("+args+")");
             args = caller+" "+args;
             String result = before+'\n'+callVar+" = ["+caller+"]"+"\n"+callVar+" = ["+callVar+"+"+offset+"]"+"\n"+newVar+" = call "+callVar+"("+args+")";
             return result;
@@ -1113,6 +1163,10 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String fixedArgs = "";
 
       String[] argList = _ret.split("\\|");
+      /*System.out.println("ArgList:");
+      for (String arg:argList) {
+         System.out.println(arg);
+      }*/
       for (String arg:argList) {
          if (arg.contains(";")) {
             String[] splitArgs = arg.split(";");
@@ -1153,7 +1207,7 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       else {
          _ret = "|"+expr+";"+var;
       }
-      return "|"+expr;
+      return _ret;
    }
 
    /**
@@ -1174,10 +1228,16 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       if (expr.contains("|")) {
          String[] complexAssignment = expr.split("\\|");
          if (complexAssignment[0].equals("Array")) {
-            int i = Integer.parseInt(complexAssignment[1]);
-            String var = getNewTempName();
-            argu.lastTemp = var;
-            _ret = var+" = "+complexAssignment[2]+"\n["+var+"] = "+i;
+            try {
+               int i = Integer.parseInt(complexAssignment[1]);
+               String var = getNewTempName();
+               argu.lastTemp = var;
+               _ret = var + " = " + complexAssignment[2] + "\n[" + var + "] = " + i;
+            }
+            catch (Exception e) {
+               //System.out.println("Primary Expr: "+expr);
+               _ret = complexAssignment[2];
+            }
             return _ret;
          }
          else {
@@ -1225,7 +1285,15 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
     * f0 -> <IDENTIFIER>
     */
    public String visit(Identifier n, SymbolTable argu) {
+      //TODO
       String _ret = n.f0.accept(this, argu);
+      ClassObject currentClass = argu.classes.get(argu.currentClass);
+      for (int i = 0; i < currentClass.classVariables.size(); i++) {
+         if (currentClass.classVariables.get(i).equals(_ret)) {
+            return ";ClassVar;"+((i*4)+4)+";";
+         }
+      }
+
       return _ret;
    }
 
@@ -1253,9 +1321,17 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String expr = n.f3.accept(this, argu);
       n.f4.accept(this, argu);
       print("Alloc: "+expr);
-      int i = Integer.parseInt(expr);
-      //TODO: for all array ops support symbols
-      return "Array|"+i+"|HeapAllocZ("+((i*4)+4)+")";
+      try {
+         int i = Integer.parseInt(expr);
+         return "Array|"+i+"|HeapAllocZ("+((i*4)+4)+")";
+      }
+      catch (Exception e){
+         //System.out.println("ArrayAlloc Expr: "+expr);
+         if (!argu.foundAbstractAllocation)
+            argu.setFoundAbstractAllocation();
+         return "Array|ABS|call :AbstractAlloc("+expr+")";
+      }
+
    }
 
    /**

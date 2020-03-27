@@ -2,6 +2,7 @@ import static java.lang.System.exit;
 
 import java.security.InvalidKeyException;
 import java.util.HashMap;
+import java.util.TreeMap;
 import syntaxtree.Goal;
 
 public class J2V {
@@ -47,10 +48,24 @@ public class J2V {
     //System.out.println(symbolTable);
 
     VaporVisitor vapor = new VaporVisitor();
-    vapor.debug = true;
+    //vapor.debug = true;
     String output = vapor.visit(root, symbolTable);
     //System.out.println(program);
     String program = symbolTable.classConsts+'\n';
+/*
+    for (ClassObject o: symbolTable.classes.values()) {
+      System.out.println(o.className+": Methods: "+o.classMethods.size()+", Vars: "+o.classVariables.size());
+      System.out.println("\tMethods:");
+      for (String var: o.classMethods) {
+        System.out.println("\t"+var);
+      }
+      System.out.println("\tVars:");
+      for (String var: o.classVariables) {
+        System.out.println("\t"+var);
+      }
+    }
+    */
+
     for (MethodBlock block : symbolTable.blocks.values()) {
       program += block.toString() + "\n\n";
     }

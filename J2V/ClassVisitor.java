@@ -152,7 +152,7 @@ public class ClassVisitor implements GJVisitor<String, SymbolTable> {
       argu.addMainClass(id, new ClassObject(id));
       n.f2.accept(this, argu);
       argu.setCurrentClass(id);
-
+      argu.inMethod=true;
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
       n.f5.accept(this, argu);
@@ -170,6 +170,7 @@ public class ClassVisitor implements GJVisitor<String, SymbolTable> {
       n.f16.accept(this, argu);
 
       n.f17.accept(this, argu);
+      argu.inMethod=false;
       return _ret;
    }
 
@@ -249,7 +250,7 @@ public class ClassVisitor implements GJVisitor<String, SymbolTable> {
       String type = n.f0.accept(this, argu);
       String name = n.f1.accept(this, argu);
       n.f2.accept(this, argu);
-      argu.addVar(name);
+      argu.addVar(name, type);
       return _ret;
    }
 
@@ -269,6 +270,7 @@ public class ClassVisitor implements GJVisitor<String, SymbolTable> {
     * f12 -> "}"
     */
    public String visit(MethodDeclaration n, SymbolTable argu) {
+      argu.inMethod=true;
       String _ret=null;
       n.f0.accept(this, argu);
       String returnType = n.f1.accept(this, argu);
@@ -296,6 +298,7 @@ public class ClassVisitor implements GJVisitor<String, SymbolTable> {
       n.f10.accept(this, argu);
       n.f11.accept(this, argu);
       n.f12.accept(this, argu);
+      argu.inMethod=false;
       return _ret;
    }
 

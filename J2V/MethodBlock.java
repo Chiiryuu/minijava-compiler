@@ -5,6 +5,8 @@ public class MethodBlock {
   public String args="";
   public ArrayList<String> statements;
 
+  private int tempVars = 0;
+
   public MethodBlock(String name) {
     this.name = name;
     this.statements = new ArrayList<>();
@@ -22,6 +24,10 @@ public class MethodBlock {
     return statements.get(statements.size()-1);
   }
 
+  private String getTempVar() {
+      return name+"." + tempVars++;
+  }
+
   public void addStatement(String statement) {
     statements.add(statement);
   }
@@ -30,19 +36,36 @@ public class MethodBlock {
   public String toString() {
     String result="func "+name+"("+args+")\n";
     for (int i=0; i<statements.size();i++) {
-      if (i+1 == statements.size()) {
-        String last = "  "+statements.get(i);
-        if (last.matches("  ret .*")) {
-          result += last;
+
+        String statement = statements.get(i);
+        if (statement.matches(";ClassVar;\\d*;\\s=\\s.*")) {
+          String[] stats = statement.split(";");
+          String var = getTempVar();
+          //int num = Integer.parseInt(stats[2]) * 4 + 4;
+          //result += "  " + var+" = Add(this "+stats[2]+")\n  ["+var+"]"+stats[3]+'\n';
+          //result += "  [this+"+stats[2]+"]"+stats[3]+'\n';
+          result += "  " + var+stats[3]+"\n  [this+"+stats[2]+"] = "+var+'\n';
+        }
+        else if (statement.contains(";ClassVar;")) {
+          String[] stats = statement.split(";");
+          String var = getTempVar();
+          String extra = "";
+          if (stats.length > 3)
+            extra = stats[3];
+          result += "  " + var+" = [this+"+stats[2]+"]\n  "+stats[0]+var+extra+'\n';
+
         }
         else {
-          result += last+"\n  ret";
+          result += "  " + statement + '\n';
+        }
+
+
+      if (i+1 == statements.size()) {
+        if (!statement.matches("ret .*")) {
+          result += "  ret\n";
         }
       }
-      else
-      result += "  " + statements.get(i) + '\n'; {
 
-      }
     }
     return result;
   }
