@@ -1,0 +1,149 @@
+const vmt_LS
+  :LS.Start
+  :LS.Print
+  :LS.Search
+  :LS.Init
+
+
+func LS.Init(this sz )
+  LS.Init.0 = sz
+  [this+8] = LS.Init.0
+  LS.Init.1 = call :AbstractAlloc(sz)
+  [this+4] = LS.Init.1
+  j = 1
+  LS.Init.2 = [this+8]
+  t.27 = Add(LS.Init.2 1)
+  k = t.27
+  if6_start:
+  LS.Init.3 = [this+8]
+  t.28 = LtS(j LS.Init.3)
+  if0 t.28 goto :if6_end
+    t.29 = MulS(2 j)
+    aux01 = t.29
+    t.30 = Sub(k 3)
+    aux02 = t.30
+    t.31 = Add(aux01 aux02)
+    t.33 = MulS(4 j)
+    t.33 = Add(4 t.33)
+  LS.Init.4 = [this+4]
+    t.32 = Add(LS.Init.4 t.33)
+    [t.32] = t.31
+    t.34 = Add(j 1)
+    j = t.34
+    t.35 = Sub(k 1)
+    k = t.35
+    goto :if6_start
+  if6_end:
+  ret 0
+
+
+func AbstractAlloc(len)
+  size = MulS(len 4)
+  size = Add(size 4)
+  arr = HeapAllocZ(size)
+  [arr] = len
+  ret arr
+
+
+func LS.Print(this  )
+  j = 1
+  if2_start:
+  LS.Print.0 = [this+8]
+  t.15 = LtS(j LS.Print.0)
+  if0 t.15 goto :if2_end
+    t.17 = MulS(4 j)
+    t.17 = Add(4 t.17)
+  LS.Print.1 = [this+4]
+    t.17 = Add(LS.Print.1 t.17)
+    t.16 = [t.17]
+    PrintIntS(t.16)
+    t.18 = Add(j 1)
+    j = t.18
+    goto :if2_start
+  if2_end:
+  ret 0
+
+
+func Main()
+  t.0 = HeapAllocZ(12)
+  [t.0] = :vmt_LS
+  if t.0 goto :null_if1
+    Error("null pointer")
+  null_if1:
+  t.1 = [t.0]
+  t.1 = [t.1+0]
+  t.2 = call t.1(t.0 10)
+  PrintIntS(t.2)
+  ret
+
+
+func LS.Start(this sz )
+  t.3 = [this]
+  t.3 = [t.3+12]
+  t.4 = call t.3(this sz)
+  aux01 = t.4
+  t.5 = [this]
+  t.5 = [t.5+4]
+  t.6 = call t.5(this )
+  aux02 = t.6
+  PrintIntS(9999)
+  t.7 = [this]
+  t.7 = [t.7+8]
+  t.8 = call t.7(this 8)
+  PrintIntS(t.8)
+  t.9 = [this]
+  t.9 = [t.9+8]
+  t.10 = call t.9(this 12)
+  PrintIntS(t.10)
+  t.11 = [this]
+  t.11 = [t.11+8]
+  t.12 = call t.11(this 17)
+  PrintIntS(t.12)
+  t.13 = [this]
+  t.13 = [t.13+8]
+  t.14 = call t.13(this 50)
+  PrintIntS(t.14)
+  ret 55
+
+
+func LS.Search(this num )
+  j = 1
+  ls01 = 0
+  ifound = 0
+  if5_start:
+  LS.Search.0 = [this+8]
+  t.19 = LtS(j LS.Search.0)
+  if0 t.19 goto :if5_end
+    t.21 = MulS(4 j)
+    t.21 = Add(4 t.21)
+  LS.Search.1 = [this+4]
+    t.21 = Add(LS.Search.1 t.21)
+    t.20 = [t.21]
+    aux01 = t.20
+    t.22 = Add(num 1)
+    aux02 = t.22
+    t.23 = LtS(aux01 num)
+    if0 t.23 goto :if4_else
+      nt = 0
+    goto :if4_end
+    if4_else:
+      t.24 = LtS(aux01 aux02)
+      t.25 = Sub(1 t.24)
+      if0 t.25 goto :if3_else
+        nt = 0
+      goto :if3_end
+      if3_else:
+        ls01 = 1
+        ifound = 1
+  LS.Search.2 = [this+8]
+        j = LS.Search.2
+      if3_end:
+    if4_end:
+    t.26 = Add(j 1)
+    j = t.26
+    goto :if5_start
+  if5_end:
+  ret ifound
+
+
+

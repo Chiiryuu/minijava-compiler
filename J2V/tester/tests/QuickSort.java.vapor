@@ -1,0 +1,231 @@
+const vmt_QS
+  :QS.Start
+  :QS.Sort
+  :QS.Print
+  :QS.Init
+
+
+func QS.Sort(this left right )
+  t = 0
+  t.12 = LtS(left right)
+  if0 t.12 goto :if8_else
+    t.14 = MulS(4 right)
+    t.14 = Add(4 t.14)
+  QS.Sort.0 = [this+4]
+    t.14 = Add(QS.Sort.0 t.14)
+    t.13 = [t.14]
+    v = t.13
+    t.15 = Sub(left 1)
+    i = t.15
+    j = right
+    cont01 = 1
+    if7_start:
+    if0 cont01 goto :if7_end
+      cont02 = 1
+      if3_start:
+      if0 cont02 goto :if3_end
+        t.16 = Add(i 1)
+        i = t.16
+        t.18 = MulS(4 i)
+        t.18 = Add(4 t.18)
+  QS.Sort.1 = [this+4]
+        t.18 = Add(QS.Sort.1 t.18)
+        t.17 = [t.18]
+        aux03 = t.17
+        t.19 = LtS(aux03 v)
+        t.20 = Sub(1 t.19)
+        if0 t.20 goto :if2_else
+          cont02 = 0
+        goto :if2_end
+        if2_else:
+          cont02 = 1
+        if2_end:
+        goto :if3_start
+      if3_end:
+      cont02 = 1
+      if5_start:
+      if0 cont02 goto :if5_end
+        t.21 = Sub(j 1)
+        j = t.21
+        t.23 = MulS(4 j)
+        t.23 = Add(4 t.23)
+  QS.Sort.2 = [this+4]
+        t.23 = Add(QS.Sort.2 t.23)
+        t.22 = [t.23]
+        aux03 = t.22
+        t.24 = LtS(v aux03)
+        t.25 = Sub(1 t.24)
+        if0 t.25 goto :if4_else
+          cont02 = 0
+        goto :if4_end
+        if4_else:
+          cont02 = 1
+        if4_end:
+        goto :if5_start
+      if5_end:
+      t.27 = MulS(4 i)
+      t.27 = Add(4 t.27)
+  QS.Sort.3 = [this+4]
+      t.27 = Add(QS.Sort.3 t.27)
+      t.26 = [t.27]
+      t = t.26
+      t.29 = MulS(4 j)
+      t.29 = Add(4 t.29)
+  QS.Sort.4 = [this+4]
+      t.29 = Add(QS.Sort.4 t.29)
+      t.28 = [t.29]
+      t.31 = MulS(4 i)
+      t.31 = Add(4 t.31)
+  QS.Sort.5 = [this+4]
+      t.30 = Add(QS.Sort.5 t.31)
+      [t.30] = t.28
+      t.33 = MulS(4 j)
+      t.33 = Add(4 t.33)
+  QS.Sort.6 = [this+4]
+      t.32 = Add(QS.Sort.6 t.33)
+      [t.32] = t
+      t.34 = Add(i 1)
+      t.35 = LtS(j t.34)
+      if0 t.35 goto :if6_else
+        cont01 = 0
+      goto :if6_end
+      if6_else:
+        cont01 = 1
+      if6_end:
+      goto :if7_start
+    if7_end:
+    t.37 = MulS(4 i)
+    t.37 = Add(4 t.37)
+  QS.Sort.7 = [this+4]
+    t.37 = Add(QS.Sort.7 t.37)
+    t.36 = [t.37]
+    t.39 = MulS(4 j)
+    t.39 = Add(4 t.39)
+  QS.Sort.8 = [this+4]
+    t.38 = Add(QS.Sort.8 t.39)
+    [t.38] = t.36
+    t.41 = MulS(4 right)
+    t.41 = Add(4 t.41)
+  QS.Sort.9 = [this+4]
+    t.41 = Add(QS.Sort.9 t.41)
+    t.40 = [t.41]
+    t.43 = MulS(4 i)
+    t.43 = Add(4 t.43)
+  QS.Sort.10 = [this+4]
+    t.42 = Add(QS.Sort.10 t.43)
+    [t.42] = t.40
+    t.45 = MulS(4 right)
+    t.45 = Add(4 t.45)
+  QS.Sort.11 = [this+4]
+    t.44 = Add(QS.Sort.11 t.45)
+    [t.44] = t
+    t.46 = Sub(i 1)
+    t.47 = [this]
+    t.47 = [t.47+4]
+    t.48 = call t.47(this left t.46)
+    nt = t.48
+    t.49 = Add(i 1)
+    t.50 = [this]
+    t.50 = [t.50+4]
+    t.51 = call t.50(this t.49 right)
+    nt = t.51
+  goto :if8_end
+  if8_else:
+    nt = 0
+  if8_end:
+  ret 0
+
+
+func QS.Print(this  )
+  j = 0
+  if9_start:
+  QS.Print.0 = [this+8]
+  t.52 = LtS(j QS.Print.0)
+  if0 t.52 goto :if9_end
+    t.54 = MulS(4 j)
+    t.54 = Add(4 t.54)
+  QS.Print.1 = [this+4]
+    t.54 = Add(QS.Print.1 t.54)
+    t.53 = [t.54]
+    PrintIntS(t.53)
+    t.55 = Add(j 1)
+    j = t.55
+    goto :if9_start
+  if9_end:
+  ret 0
+
+
+func AbstractAlloc(len)
+  size = MulS(len 4)
+  size = Add(size 4)
+  arr = HeapAllocZ(size)
+  [arr] = len
+  ret arr
+
+
+func QS.Init(this sz )
+  QS.Init.0 = sz
+  [this+8] = QS.Init.0
+  QS.Init.1 = call :AbstractAlloc(sz)
+  [this+4] = QS.Init.1
+  QS.Init.2 = [this+4]
+  [QS.Init.2+4] = 20
+  QS.Init.3 = [this+4]
+  [QS.Init.3+8] = 7
+  QS.Init.4 = [this+4]
+  [QS.Init.4+12] = 12
+  QS.Init.5 = [this+4]
+  [QS.Init.5+16] = 18
+  QS.Init.6 = [this+4]
+  [QS.Init.6+20] = 2
+  QS.Init.7 = [this+4]
+  [QS.Init.7+24] = 11
+  QS.Init.8 = [this+4]
+  [QS.Init.8+28] = 6
+  QS.Init.9 = [this+4]
+  [QS.Init.9+32] = 9
+  QS.Init.10 = [this+4]
+  [QS.Init.10+36] = 19
+  QS.Init.11 = [this+4]
+  [QS.Init.11+40] = 5
+  ret 0
+
+
+func Main()
+  t.0 = HeapAllocZ(12)
+  [t.0] = :vmt_QS
+  if t.0 goto :null_if1
+    Error("null pointer")
+  null_if1:
+  t.1 = [t.0]
+  t.1 = [t.1+0]
+  t.2 = call t.1(t.0 10)
+  PrintIntS(t.2)
+  ret
+
+
+func QS.Start(this sz )
+  t.3 = [this]
+  t.3 = [t.3+12]
+  t.4 = call t.3(this sz)
+  aux01 = t.4
+  t.5 = [this]
+  t.5 = [t.5+8]
+  t.6 = call t.5(this )
+  aux01 = t.6
+  PrintIntS(9999)
+  QS.Start.0 = [this+8]
+  t.7 = Sub(QS.Start.0 1)
+  aux01 = t.7
+  t.8 = [this]
+  t.8 = [t.8+4]
+  t.9 = call t.8(this 0 aux01)
+  aux01 = t.9
+  t.10 = [this]
+  t.10 = [t.10+8]
+  t.11 = call t.10(this )
+  aux01 = t.11
+  ret 0
+
+
+

@@ -3,6 +3,7 @@ import java.util.TreeMap;
 
 public class SymbolTable {
   private String mainClass=null;
+  public HashMap<String, String> classVars;
   public HashMap<String, ClassObject> classes;
   public HashMap<String, MethodObject> methods;
   public HashMap<String, MethodBlock> blocks;
@@ -11,9 +12,15 @@ public class SymbolTable {
   public String blockIndentationLevel = "";
   public String lastTemp = "";
   public String classConsts = "";
+  public boolean inMethod = false;
+  public boolean foundAbstractAllocation = false;
 
   public String getLastExpression() {
     return blocks.get(currentBlock).getLastStatement();
+  }
+
+  public boolean isClass(String classIn) {
+    return classes.containsKey(classIn);
   }
 
   public void addStatement(String miniBlock) {
@@ -32,6 +39,17 @@ public class SymbolTable {
       }
     }
     return 0;
+  }
+
+  public void setFoundAbstractAllocation() {
+    foundAbstractAllocation = true;
+    MethodBlock AllocBlock = new MethodBlock("AbstractAlloc","len");
+    AllocBlock.addStatement("size = MulS(len 4)");
+    AllocBlock.addStatement("size = Add(size 4)");
+    AllocBlock.addStatement("arr = HeapAllocZ(size)");
+    AllocBlock.addStatement("[arr] = len");
+    AllocBlock.addStatement("ret arr");
+    blocks.put("AbstractAlloc",AllocBlock);
   }
 
   public void makeClassConsts() {
@@ -90,9 +108,14 @@ public class SymbolTable {
     return classIn.equals(mainClass);
   }
 
-  public void addVar(String var) {
-    ClassObject object = classes.get(currentClass);
-    object.addVariable(var);
+  public void addVar(String var, String type) {
+    if (!type.equals("Int") && !type.equals("Boolean") && !type.equals("Array")  ) {
+      classVars.put(var, type);
+    }
+    if (!inMethod) {
+      ClassObject object = classes.get(currentClass);
+      object.addVariable(var);
+    }
   }
 
   public void addMethod(MethodObject method) {
@@ -132,6 +155,7 @@ public class SymbolTable {
     this.classes = new HashMap<>();
     this.methods = new HashMap<>();
     this.blocks = new HashMap<>();
+    this.classVars = new HashMap<>();
     blocks.put("Main", new MethodBlock("Main"));
   }
 
