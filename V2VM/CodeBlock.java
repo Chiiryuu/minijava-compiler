@@ -39,22 +39,26 @@ public class CodeBlock {
     for (String line:lines) {
       if (line.contains("= [this]")) {
         String var = line.split("=")[0].trim();
-        System.out.println(var);
+        //System.out.println(var);
         thisAssigned.add(var);
       }
       if (line.contains("=")) {
         String var = line.split("=")[0].trim();
-        System.out.println(var);
+        //System.out.println(var);
         if (!var.matches("t\\.\\d+") && !var.matches("\\[t\\.\\d+\\]") && !thisVars.contains(var) ) {
           thisVars.add(var);
           local++;
         }
       }
       if (line.contains(" call ")) {
+        if (line.contains(":"+this.name))
+          this.recursive = true;
+        else {
         for (String var: thisAssigned) {
-          if (line.contains("call "+var+"(")) {
+          if (line.contains("call " + var + "(")) {
             this.recursive = true;
           }
+        }
         }
 
         int start = line.indexOf('(');
@@ -143,7 +147,7 @@ public class CodeBlock {
   public void addRecursion() {
     if (this.local > 0) {
       for (int i = 0; i < local; i++) {
-        System.out.println("Local: "+locals.get(i));
+        //System.out.println("Local: "+locals.get(i));
         int id = getVarIndex(locals.get(i));
         lines.add(0, "  "+table.registers[9]+" = [" + table.registers[8] + "+" + id+ "]");
         lines.add(1, "  local[" + i + "] = "+table.registers[9]);
@@ -242,14 +246,24 @@ public class CodeBlock {
         if (callers.length == 4) {
           String assigned = callers[0];
           String function = callers[3];
-          cleanedBlock.add("  " + table.registers[9 + 0] + " = [" + table.registers[8] + "+" + getVarIndex(function) + "]");
-          cleanedBlock.add("  call "+table.registers[9 + 0]);
+          if (function.startsWith(":")) {
+            cleanedBlock.add("  call " + function);
+          }
+          else {
+            cleanedBlock.add("  " + table.registers[9 + 0] + " = [" + table.registers[8] + "+" + getVarIndex(function) + "]");
+            cleanedBlock.add("  call " + table.registers[9 + 0]);
+          }
           cleanedBlock.add("  [" +table.registers[8] + "+" + getVarIndex(assigned)+"] = "+table.registers[21]);
         }
         else {
           String function = callers[1];
-          cleanedBlock.add("  " + table.registers[9 + 0] + " = [" + table.registers[8] + "+" + getVarIndex(function) + "]");
-          cleanedBlock.add("  call "+table.registers[9 + 0]);
+          if (function.startsWith(":")) {
+            cleanedBlock.add("  call " + function);
+          }
+          else {
+            cleanedBlock.add("  " + table.registers[9 + 0] + " = [" + table.registers[8] + "+" + getVarIndex(function) + "]");
+            cleanedBlock.add("  call " + table.registers[9 + 0]);
+          }
         }
 
 
@@ -257,9 +271,10 @@ public class CodeBlock {
 
       else {
         for (String var : localVars) {
-
-          if (line.contains(var)) {
+          String lineExt = " "+line+" ";
+          if (line.contains(var) && lineExt.matches(".*\\W"+var+"\\W.*")) {
             int varIndex = localVars.indexOf(var);
+            //System.out.println(line+" -> "+var);
             cleanedBlock.add("  " + table.registers[9 + regNum] + " = [" + table.registers[8] + "+" + getVarIndex(var) + "]");
             if (line.contains(var+" =")) {
               assignNum = varIndex;
