@@ -324,6 +324,7 @@ public class ClassVisitor implements GJVisitor<String, SymbolTable> {
       String _ret="";
       String type = n.f0.accept(this, argu);
       String name = n.f1.accept(this, argu);
+      argu.addVar(name, type);
       return name;
    }
 

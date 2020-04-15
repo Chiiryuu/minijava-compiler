@@ -30,6 +30,13 @@ public class SymbolTable {
     }
   }
 
+  public String getObjectType(String name) {
+    if (name == null || name.equals("this"))
+      return currentClass;
+    String result = classVars.get(currentClass+"."+name);
+    return result;
+  }
+
   public int getMethodOffset(String className, String method) {
     ClassObject object = classes.get(className);
     for (int i=0; i<object.classMethods.size();i++) {
@@ -110,7 +117,7 @@ public class SymbolTable {
 
   public void addVar(String var, String type) {
     if (!type.equals("Int") && !type.equals("Boolean") && !type.equals("Array")  ) {
-      classVars.put(var, type);
+      classVars.put(currentClass+"."+var, type);
     }
     if (!inMethod) {
       ClassObject object = classes.get(currentClass);

@@ -38,7 +38,12 @@ public class MethodBlock {
     for (int i=0; i<statements.size();i++) {
 
         String statement = statements.get(i);
-        if (statement.matches(";ClassVar;\\d*;\\s=\\s.*")) {
+        if (statement.matches(";ClassVar;\\d*;\\s=\\s*;ClassVar;.*")) {
+          String[] stats = statement.split(";");
+          String var = getTempVar();
+          result += "  "+var+" = [this+"+stats[5]+"]\n  [this+"+stats[2]+"] = "+var+'\n';
+        }
+        else if (statement.matches(";ClassVar;\\d*;\\s*=\\s*.*")) {
           String[] stats = statement.split(";");
           String var = getTempVar();
           //int num = Integer.parseInt(stats[2]) * 4 + 4;
@@ -47,12 +52,25 @@ public class MethodBlock {
           result += "  " + var+stats[3]+"\n  [this+"+stats[2]+"] = "+var+'\n';
         }
         else if (statement.contains(";ClassVar;")) {
-          String[] stats = statement.split(";");
-          String var = getTempVar();
-          String extra = "";
-          if (stats.length > 3)
-            extra = stats[3];
-          result += "  " + var+" = [this+"+stats[2]+"]\n  "+stats[0]+var+extra+'\n';
+          if (statement.split(";ClassVar;").length > 2) {
+            String[] stats = statement.split(";");
+            String var1 = getTempVar();
+            String var2 = getTempVar();
+            String extra = "";
+            if (stats.length > 6)
+              extra = stats[6];
+            result +=  "  " + var1 + " = [this+" + stats[2] + "]\n  " + "  " + var2 + " = [this+" + stats[5] + "]\n  "+ stats[0] + var1+ " " + var2 + extra + '\n';
+          }
+          else {
+            //System.out.println("Before: "+statement);
+            String[] stats = statement.split(";");
+            String var = getTempVar();
+            String extra = "";
+            if (stats.length > 3)
+              extra = stats[3];
+            result += "  " + var + " = [this+" + stats[2] + "]\n  " + stats[0] + var + extra + '\n';
+            //System.out.println("After: "+"  " + var + " = [this+" + stats[2] + "]\n  " + stats[0] + var + extra + '\n');
+          }
 
         }
         else {

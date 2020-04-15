@@ -563,7 +563,7 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String expr = n.f2.accept(this, argu);
       n.f3.accept(this, argu);
 
-      print("Assign:" + expr);
+      print("Assign:" + expr + " -> "+id);
 
       String var = argu.lastTemp;
       argu.lastTemp="";
@@ -571,8 +571,10 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       if (var.length() == 0) {
 
          String[] expressionList = expr.split("\n");
-         if (expressionList.length == 1)
+         if (expressionList.length == 1) {
+            print("Single-line sent: "+id + " = " + expr);
             return id + " = " + expr;
+         }
          else {
             _ret = "";
             for (int i = 0; i < expressionList.length - 1; i++) {
@@ -1076,11 +1078,15 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
 
       String before = "";
 
-      print("RawArgs: "+args);
+      //System.out.println("RawArgs: "+args);
       if (args.contains(";")) {
          String[] argsBroken = args.split(";");
          before = argsBroken[0];
          args = argsBroken[1].trim();
+      }
+
+      if (args.contains("|")) {
+         args = args.replaceAll("\\|",";");
       }
 
       print("Before: "+before);
@@ -1094,11 +1100,13 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       //Caller is className
       print("Caller: "+caller);
       int offset = 0;
-      if (!argu.classVars.containsKey(caller))
+      if (!argu.classVars.containsKey(argu.currentClass+"."+caller))
          offset = argu.getMethodOffset(argu.currentClass,funcName);
       else
-         offset = argu.getMethodOffset(argu.classVars.get(caller),funcName);
+         offset = argu.getMethodOffset(argu.getObjectType(caller),funcName);
 
+      if (offset==0) {
+      }
 
       if (var.length() == 0) {
          if (caller.equals("this")) {
@@ -1168,7 +1176,10 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
          System.out.println(arg);
       }*/
       for (String arg:argList) {
-         if (arg.contains(";")) {
+         if (arg.contains(";ClassVar;")) {
+            fixedArgs+= arg.replaceAll(";","|")+" ";
+         }
+         else if (arg.contains(";")) {
             String[] splitArgs = arg.split(";");
             before += splitArgs[0] + "\n";
             //System.out.println("\""+splitArgs[1]+"\"");
