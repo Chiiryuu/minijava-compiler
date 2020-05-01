@@ -131,7 +131,28 @@ public class CodeConverter {
 
         if (rhs.contains("HeapAllocZ(")) {
           String size = rhs.split("[()]")[1];
-          MIPS.add("  li $a0 "+size+"\n  jal _heapAlloc\n  move "+lhs+" $v0");
+          if (isImmediate(size)) {
+            MIPS.add("  li $a0 " + size + "\n  jal _heapAlloc\n  move " + lhs + " $v0");
+          }
+          else {
+            MIPS.add("  move $a0 " + size + "\n  jal _heapAlloc\n  move " + lhs + " $v0");
+          }
+        }
+
+        else if (rhs.contains("Lt(")) {
+          String[] vars = rhs.split("[()]");
+          vars = vars[1].split(" ");
+          String var1 = vars[0];
+          String var2 = vars[1];
+          if (isRegister(var1) && isRegister(var2)) {
+            MIPS.add("  sltu "+lhs+" "+var1+" "+var2);
+          }
+          else if (isRegister(var1) && isImmediate(var2)) {
+            MIPS.add("  slti "+lhs+" "+var1+" "+var2);
+          }
+          else if (isImmediate(var1) && isRegister(var2)) {
+            MIPS.add("  li $t9 "+var1+"\n   sltu "+lhs+" $t9 "+var2+"\n");
+          }
         }
 
         else if (rhs.contains("LtS(")) {
@@ -146,7 +167,7 @@ public class CodeConverter {
             MIPS.add("  slti "+lhs+" "+var1+" "+var2);
           }
           else if (isImmediate(var1) && isRegister(var2)) {
-            MIPS.add("  slti "+lhs+" "+var2+" "+var1);
+            MIPS.add("  li $t9 "+var1+"\n   sltu "+lhs+" $t9 "+var2+"\n");
           }
         }
 
@@ -237,7 +258,12 @@ public class CodeConverter {
         }
 
         else if (isAddress(lhs) && isImmediate(rhs)) {
-          MIPS.add("  sw $"+rhs+" "+lhs);
+          if (rhs.equals("0")) {
+            MIPS.add("  sw $" + rhs + " " + lhs);
+          }
+          else {
+            MIPS.add("  li $t9 "+rhs+"\n   sw $t9 "+lhs+"\n");
+          }
         }
 
         else if (isAddress(lhs) && isRegister(rhs)) {
