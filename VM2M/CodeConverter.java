@@ -11,6 +11,8 @@ public class CodeConverter {
   boolean foundFirstText = false;
   boolean debug = false;
 
+  int eqCounter = 0;
+
   static final String finalCode = "\n_print:\n"
       + "  li $v0 1\n"
       + "  syscall\n"
@@ -54,6 +56,10 @@ public class CodeConverter {
   frame[n+m-1+2] = out[m-1] // The total size of the frame is 2+n+m
 
    */
+
+  public String getNewEQLabel() {
+      return "EqLabel" + eqCounter++;
+  }
 
   public boolean isImmediate(String val) {
     try {
@@ -139,6 +145,25 @@ public class CodeConverter {
           }
         }
 
+        else if (rhs.contains("Eq(")) {
+          String[] vars = rhs.split("[()]");
+          vars = vars[1].split(" ");
+          String var1 = vars[0];
+          String var2 = vars[1];
+
+          String label = getNewEQLabel();
+
+          if (isImmediate(var1) && isImmediate(var2)) {
+            MIPS.add("  li "+lhs+" 0\n  li $t9 "+var1+"\n  bne $t9 "+var2+" "+label+"\n  li "+lhs+" 1\n "+label+":");
+          }
+          else if (isImmediate(var1) && isRegister(var2)) {
+            MIPS.add("  li "+lhs+" 0\n  bne "+var2+" "+var1+" "+label+"\n  li "+lhs+" 1\n "+label+":");
+          }
+          else {
+            MIPS.add("  li "+lhs+" 0\n  bne "+var1+" "+var2+" "+label+"\n  li "+lhs+" 1\n "+label+":");
+          }
+        }
+
         else if (rhs.contains("Lt(")) {
           String[] vars = rhs.split("[()]");
           vars = vars[1].split(" ");
@@ -151,6 +176,9 @@ public class CodeConverter {
             MIPS.add("  slti "+lhs+" "+var1+" "+var2);
           }
           else if (isImmediate(var1) && isRegister(var2)) {
+            MIPS.add("  li $t9 "+var1+"\n   sltu "+lhs+" $t9 "+var2+"\n");
+          }
+          else if (isImmediate(var1) && isImmediate(var2)) {
             MIPS.add("  li $t9 "+var1+"\n   sltu "+lhs+" $t9 "+var2+"\n");
           }
         }
@@ -167,6 +195,9 @@ public class CodeConverter {
             MIPS.add("  slti "+lhs+" "+var1+" "+var2);
           }
           else if (isImmediate(var1) && isRegister(var2)) {
+            MIPS.add("  li $t9 "+var1+"\n   sltu "+lhs+" $t9 "+var2+"\n");
+          }
+          else if (isImmediate(var1) && isImmediate(var2)) {
             MIPS.add("  li $t9 "+var1+"\n   sltu "+lhs+" $t9 "+var2+"\n");
           }
         }
@@ -195,11 +226,11 @@ public class CodeConverter {
           vars = vars[1].split(" ");
           String var1 = vars[0];
           String var2 = vars[1];
-          if (isImmediate(var1) && !isImmediate(var2)) {
-            MIPS.add("  subu " + lhs + " " + var2 + " " + var1);
+          if (isRegister(var1) && isRegister(var2)) {
+            MIPS.add("  subu " + lhs + " " + var1 + " " + var2);
           }
-          else if (isImmediate(var1) && isImmediate(var2)) {
-            MIPS.add("  li $t9 "+var2+"\n  subu " + lhs + " $t9 " + var1);
+          else if ((isImmediate(var1) && isImmediate(var2)) || (isImmediate(var1) && isRegister(var2))) {
+            MIPS.add("  li $t9 "+var1+"\n  subu " + lhs + " $t9 " + var2);
           }
           else {
             MIPS.add("  subu " + lhs + " " + var1 + " " + var2);
@@ -211,11 +242,11 @@ public class CodeConverter {
           vars = vars[1].split(" ");
           String var1 = vars[0];
           String var2 = vars[1];
-          if (isImmediate(var1) && !isImmediate(var2)) {
+          if (isImmediate(var1) && isRegister(var2)) {
             MIPS.add("  mul " + lhs + " " + var2 + " " + var1);
           }
-          else if (isImmediate(var1) && isImmediate(var2)) {
-            MIPS.add("  li $t9 "+var2+"\n  mul " + lhs + " $t9 " + var1);
+          else if ((isImmediate(var1) && isImmediate(var2))) {
+            MIPS.add("  li $t9 "+var1+"\n  mul " + lhs + " $t9 " + var2);
           }
           else {
             MIPS.add("  mul " + lhs + " " + var1 + " " + var2);
@@ -231,6 +262,9 @@ public class CodeConverter {
           int outNum = Integer.parseInt(lhs.split("[\\[\\]]")[1]);
           if (isImmediate(rhs)) {
             MIPS.add("  li $t9 " + rhs + "\n  sw $t9 " + (outNum * 4) + "($sp)");
+          }
+          else if (isLabel(rhs)) {
+            MIPS.add("  la $t9 " + rhs.substring(1) + "\n  sw $t9 " + (outNum * 4) + "($sp)");
           }
           else {
             MIPS.add("  sw "+rhs+" "+ (outNum * 4) + "($sp)");
@@ -298,7 +332,7 @@ public class CodeConverter {
         }
       }
       else if (lineTrimmed.matches("if0 .*goto :.*")) {
-        String[] components = lineTrimmed.substring(3).split(" goto ");
+        String[] components = lineTrimmed.substring(4).split(" goto ");
         MIPS.add("  beqz "+components[0]+" "+components[1].substring(1));
       }
       else if (lineTrimmed.matches("if .*goto :.*")) {
