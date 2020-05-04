@@ -15,6 +15,7 @@ public class VM2M {
     String inputRaw = "";
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
+      line = line.replaceAll("\\{.*?\\}","");
       line = line.replaceAll("\\s"," ");
       inputRaw+=line+'\n';
       inputLines.add(line);

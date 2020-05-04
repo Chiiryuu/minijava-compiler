@@ -258,6 +258,24 @@ public class CodeConverter {
           MIPS.add("  lw "+lhs+" "+(inNum*4)+"($fp)");
         }
 
+        else if (isInVar(lhs)) {
+          int inNum = Integer.parseInt(lhs.split("[\\[\\]]")[1]);
+          if (isImmediate(rhs)) {
+            MIPS.add("  li $t9 " + rhs + "\n  sw $t9 " + (inNum * 4) + "($fp)");
+          }
+          else if (isLabel(rhs)) {
+            MIPS.add("  la $t9 " + rhs.substring(1) + "\n  sw $t9 " + (inNum * 4) + "($fp)");
+          }
+          else {
+            MIPS.add("  sw "+rhs+" "+ (inNum * 4) + "($fp)");
+          }
+        }
+
+        else if (isOutVar(rhs)) {
+          int outNum = Integer.parseInt(rhs.split("[\\[\\]]")[1]);
+          MIPS.add("  lw "+lhs+" "+(outNum*4)+"($sp)");
+        }
+
         else if (isOutVar(lhs)) {
           int outNum = Integer.parseInt(lhs.split("[\\[\\]]")[1]);
           if (isImmediate(rhs)) {
@@ -270,6 +288,9 @@ public class CodeConverter {
             MIPS.add("  sw "+rhs+" "+ (outNum * 4) + "($sp)");
           }
         }
+
+
+
 
         else if (isRegister(lhs) && isLabel(rhs)) {
           MIPS.add("  lw "+lhs+" "+rhs.substring(1));
