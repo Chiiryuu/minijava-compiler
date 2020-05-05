@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -143,6 +144,7 @@ public class SymbolTable {
 
         for (String var:parentObject.classVariables) {
           object.addVariable(var);
+          classVars.put(object.className+"."+var,classVars.get(parentObject.className+"."+var));
         }
         for (String method:parentObject.classMethods) {
           object.addMethod(method);

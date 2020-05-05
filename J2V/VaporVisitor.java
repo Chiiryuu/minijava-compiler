@@ -563,7 +563,7 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       String expr = n.f2.accept(this, argu);
       n.f3.accept(this, argu);
 
-      print("Assign:" + expr + " -> "+id);
+      //System.out.println("Assign:" + expr + " -> "+id);
 
       String var = argu.lastTemp;
       argu.lastTemp="";
@@ -585,6 +585,10 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
          }
       }
       else {
+         if (id.contains(";ClassVar;")) {
+            id = "[this+"+id.split(";")[2]+"]";
+         }
+         //System.out.println("Result: "+expr+"\n"+id+" = "+var);
          _ret = expr+"\n"+id+" = "+var;
          return _ret;
       }
@@ -1100,7 +1104,27 @@ public class VaporVisitor implements GJVisitor<String,SymbolTable> {
       //Caller is className
       print("Caller: "+caller);
       int offset = 0;
-      if (!argu.classVars.containsKey(argu.currentClass+"."+caller))
+      if (caller.contains(";ClassVar;")) {
+         int varId = Integer.parseInt(caller.split(";")[2])/4 - 1;
+         String callerVarName = argu.classes.get(argu.currentClass).classVariables.get(varId);
+         String varType = null;
+         String currentClass = argu.currentClass;
+         boolean foundVar = false;
+         while (!foundVar && currentClass != null) {
+            String callerType = argu.classVars.get(currentClass+"."+callerVarName);
+            if (callerType == null) {
+               currentClass = argu.classes.get(currentClass).parentClass;
+            }
+            else {
+               foundVar = true;
+               varType = callerType;
+            }
+         }
+
+
+         offset = argu.getMethodOffset(varType,funcName);
+      }
+      else if (!argu.classVars.containsKey(argu.currentClass+"."+caller))
          offset = argu.getMethodOffset(argu.currentClass,funcName);
       else
          offset = argu.getMethodOffset(argu.getObjectType(caller),funcName);

@@ -64,7 +64,13 @@ public class J2V {
         System.out.println("\t"+var);
       }
     }
-    */
+
+
+      TreeMap<String, String> treeTable = new TreeMap<>();
+      treeTable.putAll(symbolTable.classVars);
+      treeTable.forEach((k,v) -> System.out.println(k+" -> "+v));
+
+*/
 
     for (MethodBlock block : symbolTable.blocks.values()) {
       program += block.toString() + "\n\n";
