@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CodeBlock {
   public SymbolTable table;
@@ -51,14 +53,15 @@ public class CodeBlock {
         }
       }
       if (line.contains(" call ")) {
+        this.recursive = true;
         if (line.contains(":"+this.name))
           this.recursive = true;
         else {
-        for (String var: thisAssigned) {
-          if (line.contains("call " + var + "(")) {
-            this.recursive = true;
+          for (String var: thisAssigned) {
+            if (line.contains("call " + var + "(")) {
+              this.recursive = true;
+            }
           }
-        }
         }
 
         int start = line.indexOf('(');
@@ -122,7 +125,7 @@ public class CodeBlock {
       for (String label: labels) {
         if (line.contains(":"+label) || line.contains(label+":"))
           line = line.replaceAll(label,"{"+i+"}");
-              i++;
+        i++;
       }
       cleanedBlock.add(line);
     }
@@ -182,7 +185,7 @@ public class CodeBlock {
       int assignReg = -1;
       int regNum = 1;
 
-      if (line.contains(" ret ")) {
+      if (line.contains(" ret ") && !line.contains("=")) {
         line = line.trim();
         String[] words = line.split(" ");
         String var = words[1];
@@ -272,7 +275,8 @@ public class CodeBlock {
       else {
         for (String var : localVars) {
           String lineExt = " "+line+" ";
-          if (line.contains(var) && lineExt.matches(".*\\W"+var+"\\W.*")) {
+          if (line.contains(var)) {
+            //if (line.matches(".*\\W"+var+"\\W.*") || line.matches("^"+var+"\\W.*") || line.matches(".*\\W"+var+"$") ) {
             int varIndex = localVars.indexOf(var);
             //System.out.println(line+" -> "+var);
             cleanedBlock.add("  " + table.registers[9 + regNum] + " = [" + table.registers[8] + "+" + getVarIndex(var) + "]");
@@ -280,7 +284,26 @@ public class CodeBlock {
               assignNum = varIndex;
               assignReg = regNum;
             }
-            line = line.replaceAll(var, "\\" + table.registers[9 + regNum]);
+            Pattern pattern = Pattern.compile("[^\\w$\\d.]"+var+"[^\\w$\\d.]");
+            Matcher matcher = pattern.matcher(line);
+            while(matcher.find()) {
+              line = line.replace(matcher.group(),
+                  matcher.group().replaceAll(var, "\\" + table.registers[9 + regNum]));
+              matcher = pattern.matcher(line);
+            }
+
+            pattern = Pattern.compile("^"+var+"[^\\w$\\d.]");
+            while(matcher.find()) {
+              line = line.replace(matcher.group(),
+                  matcher.group().replaceAll(var, "\\" + table.registers[9 + regNum]));
+              matcher = pattern.matcher(line);
+            }
+
+            if (line.matches(".*[^\\w$\\d.]"+var+"$")) {
+              line = line.substring(0,line.length()-var.length()) + table.registers[9 + regNum];
+            }
+            //line = line.replaceAll(var, "\\" + table.registers[9 + regNum]);
+
             regNum++;
           }
 
@@ -303,7 +326,7 @@ public class CodeBlock {
 
   @Override
   public String toString() {
-      String result = "";
+    String result = "";
       /*
       if (type.equals("function")) {
         String vars = String.join(" ",params);
@@ -315,16 +338,16 @@ public class CodeBlock {
         lines.add(0, "  "+table.registers[8]+" = HeapAllocZ("+4*table.vars.size()+")");
       }
     }
-      else if (type.equals("data")) {
-        result = "const "+name+'\n';
-      }
-      else {
-        result = "Unknown Type\n";
-      }
-      for (String line: lines) {
-        result+=line+'\n';
-      }
-      return result;
+    else if (type.equals("data")) {
+      result = "const "+name+'\n';
+    }
+    else {
+      result = "Unknown Type\n";
+    }
+    for (String line: lines) {
+      result+=line+'\n';
+    }
+    return result;
   }
 
 }

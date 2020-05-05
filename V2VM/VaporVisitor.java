@@ -120,7 +120,7 @@ public class VaporVisitor {
 
     int currentLineIndex = n.sourcePos.line;
     String currentLine = table.vaporProgram.get(currentLineIndex);
-    while (!currentLine.strip().startsWith("ret ") && !currentLine.strip().equals("ret")) {
+    while (currentLine.contains("=")  || (!currentLine.strip().startsWith("ret ") && !currentLine.strip().equals("ret"))) {
       //System.out.println("'"+currentLine.strip()+"'");
       function.lines.add(currentLine);
       currentLineIndex++;
